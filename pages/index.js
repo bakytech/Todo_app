@@ -13,6 +13,7 @@ const Home = () => {
     const initialRef = useRef();
     const [todos, setTodos] = useState([]);
     const [todo, setTodo] = useState(null);
+    const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
 
     const router = useRouter();
@@ -73,6 +74,27 @@ const Home = () => {
         };
     }, []);
 
+    const openHandler = (clickedTodo) => {
+        setTodo(clickedTodo);
+        onOpen();
+    };
+
+    const deleteHandler = async (todoId) => {
+        setIsDeleteLoading(true);
+        const  {error} = await supabaseClient
+            .from("todos")
+            .delete()
+            .eq("id", todoId);
+
+        if (!error) {
+            setTodos(todos.filter((todo)=> todo.id !== todoId));
+        }
+        setIsDeleteLoading(false);
+
+    };
+
+
+
 
     return (
         <div>
@@ -105,11 +127,14 @@ const Home = () => {
                     gap={{ base: "4", md: "6", lg: "8" }}
                     m="10"
                 >
-                    {todos.map((todo) => (
+                    {todos.map((todo ) => (
                         <SingleTodo
                             todo={todo}
                             key={todo.id}
-                            openHandler = {openHandler} />
+                            openHandler={openHandler}
+                            deleteHandler={deleteHandler}
+                            isDeleteLoading={isDeleteLoading}
+                        />
                     ))}
                 </SimpleGrid>
             </main>
